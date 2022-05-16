@@ -1,21 +1,23 @@
-import React, {useEffect} from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+
+import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import ProductCard from '../Component/Product/ProductCard'
 
 const Product = () => {
-    const products = useSelector(store => store.product)
-    const dispatch = useDispatch()
 
+    const [products,setProducts] = useState([])
+    
     useEffect(() => {
-        axios.get('https://fakestoreapi.com/products/')
+        axios.get('http://localhost:4000/products/')
         .then( response => {
-            dispatch({
-                type: "populateProducts",
-                payload: {
-                    products: [...response.data]
-                }
-            })
+            if ( response.data !== null ) {
+                setProducts([...response.data])
+            } else {
+                return Promise.reject({ errorMessage: 'There are currently no products'})
+            }
+        })
+        .catch( error => {
+            setProducts({...error})
         })
     }, [])
    
