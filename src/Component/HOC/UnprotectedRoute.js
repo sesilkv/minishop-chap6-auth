@@ -1,0 +1,24 @@
+import React from 'react'
+import { useSelector } from 'react-redux'
+import { Outlet, Navigate } from 'react-router-dom'
+
+const UnprotectedRoute = () => {
+
+    const user = useSelector(store => store.user.data)
+
+    if (user === null) {
+        return (
+            <Outlet />
+        )
+    } else {
+        return (
+            <Navigate to="/" />
+        )
+    }
+
+  return (
+    <div>UnprotectedRoute</div>
+  )
+}
+
+export default UnprotectedRoute
