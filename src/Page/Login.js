@@ -1,11 +1,22 @@
 import axios from 'axios'
-import React from 'react'
+import React, {useState} from 'react'
 import { useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import userSlice from '../Store/user'
+import jwtDecode from 'jwt-decode'
 
 const Login = () => {
 
     const {register, handleSubmit, formState} = useForm()
+
+    const [loginStatus, setLoginStatus] = useState({
+        success: false,
+        message: ''
+    })
+
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
 
     const formSubmitHandler = (data) => {
         const postData = {
@@ -14,16 +25,31 @@ const Login = () => {
         }
         axios.post('http://localhost:4000/login', postData)
         .then(res => {
-            localStorage.setItem('token', res.data.accessToken)
+            //memastikan accessToken ada
+            if (typeof res.data.accessToken !== 'undefined'){
+                // menyimpan token di localStorage
+                localStorage.setItem('minishopAccessToken', res.data.accessToken)
+                // menyimpan user di redux store
+                const user = jwtDecode(res.data.accessToken)
+                axios.get(`http://localhost:4000/users/${user.sub}`)
+                .then( res => {
+                    dispatch( userSlice.actions.addUser({userData: res.data}))
+                    navigate('/')
+                })
+            }
         })
         .catch(err => {
-            console.log(err)
+            setLoginStatus({
+                success: false,
+                message: 'Sorry, something is wrong. Try again later.'
+            })
         })
     }
 
   return (
     <section>
             <div className="container py-8">
+            { (!loginStatus.success && loginStatus.message) && <p className='text-sm text-red-500 italic'>{loginStatus.message}</p> }
                 <div className="max-w-[500px] mx-auto">
                     <form onSubmit={ handleSubmit(formSubmitHandler) }>
                         <div className="mb-4">
@@ -36,16 +62,6 @@ const Login = () => {
                             <input type="password" name="user_password" id="user_password" className="leading-loose border border-solid border-slate-500 block w-full" {...register('user_password',  {required: true})} autoComplete="true" />
                             <p className="text-sm text-red-500 italic">{formState.errors.user_password?.type === 'required' && "Password is required"}</p>
                         </div>
-                        {/* <div className="mb-4">
-                            <label htmlFor="firstname">First Name</label>
-                            <input type="firstname" name="firstname" id="firstname" className="leading-loose border border-solid border-slate-500 block w-full" {...register('user_firstname', {required: true})} autoComplete="true" />
-                            <p className="text-sm text-red-500 italic">{formState.errors.user_firstname?.type === 'required' && "First name is required"}</p>
-                        </div>
-                        <div className="mb-4">
-                            <label htmlFor="lastname">Last Name</label>
-                            <input type="lastname" name="lastname" id="lastname" className="leading-loose border border-solid border-slate-500 block w-full" {...register('user_lastname', {required: true})} autoComplete="true" />
-                            <p className="text-sm text-red-500 italic">{formState.errors.user_lastname?.type === 'required' && "Last name is required"}</p>
-                        </div> */}
                         <div class="mb-8">
                             <button type="submit" className="bg-green-700 px-6 py-2 text-white">Login</button>
                         </div>
