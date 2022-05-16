@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import userSlice from '../Store/user'
 import jwtDecode from 'jwt-decode'
+import { GoogleLogin, GoogleLogout } from 'react-google-login';
 
 const Login = () => {
 
@@ -46,6 +47,18 @@ const Login = () => {
         })
     }
 
+    const googleSuccessLogin = (res) => {
+        console.log(res)
+    }
+
+    const googleFailedLogin = (err) => {
+        console.log(err)
+    }
+
+    const logout = (res) => {
+        console.log(res)
+    }
+
   return (
     <section>
             <div className="container py-8">
@@ -67,6 +80,22 @@ const Login = () => {
                         </div>
                         <p>Don't have an account? <Link to="/register" className="text-blue-600">Register Now</Link></p>
                     </form>
+                    <GoogleLogin
+                        clientId="699768394018-bq144rk22oqr95vigo34uekdcod928gs.apps.googleusercontent.com"
+                        render={ props => {
+                            return (
+                                <button className="bg-red-500 text-white px-8 py-3" onClick={props.onClick} disabled={props.disabled}>Login with Google</button>
+                            )
+                        }}
+                        onSuccess={googleSuccessLogin}
+                        onFailure={googleFailedLogin}
+                        cookiePolicy={'single_host_origin'}
+                    />
+                    <GoogleLogout
+                        clientId="699768394018-bq144rk22oqr95vigo34uekdcod928gs.apps.googleusercontent.com"
+                        buttonText="Logout"
+                        onLogoutSuccess={logout}
+                    />
                 </div>
             </div>
         </section>
